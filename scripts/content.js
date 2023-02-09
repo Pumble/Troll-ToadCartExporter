@@ -79,7 +79,7 @@ function getDataFromBox(box, key) {
  */
 function cartItemsToCSV(rows) {
 	let csvContent = "data:text/csv;charset=utf-8," 
-    + rows.map(e => Object.values(e).join(",")).join("\n");
+    + rows.map(e => Object.values(e).join(";")).join("\n");
 
 	var encodedUri = encodeURI(csvContent);
 	var link = document.createElement("a");
