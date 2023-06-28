@@ -5,7 +5,8 @@
  * @return float     Number after roud-up half
  */
 function roundHalf(num) {
-	return Math.round(num*2)/2;
+	var aux = Math.round(num * 2) / 2;
+	return aux < num ? aux + 0.5 : aux;
 }
 
 /**
@@ -22,9 +23,9 @@ function roundHalf(num) {
  */
 function getDataFromName(name, key) {
 	var data = name.split(' - ');
-	switch(key) {
+	switch (key) {
 		case 'code':
-			if(data.length > 3) {
+			if (data.length > 3) {
 				return data[data.length - 2];
 			} else {
 				return data[1];
@@ -34,8 +35,8 @@ function getDataFromName(name, key) {
 			return data[data.length - 1];
 			break;
 		case 'name':
-			if(data.length > 3) {
-				return (data.filter((i,j, a) => j < a.length - 2)).join(' - ');
+			if (data.length > 3) {
+				return (data.filter((i, j, a) => j < a.length - 2)).join(' - ');
 			} else {
 				return data[0];
 			}
@@ -55,14 +56,14 @@ function getDataFromName(name, key) {
  */
 function getDataFromBox(box, key) {
 	var data = box.split(' - ');
-	switch(key) {
+	switch (key) {
 		case 'game':
 			return data[0];
 			break;
 		case 'expansion':
 			return data[1];
 			break;
-		
+
 		default:
 			return data[0];
 			break;
@@ -78,8 +79,8 @@ function getDataFromBox(box, key) {
  * @return void       Appends a link in the cart footer to donwload the CSV
  */
 function cartItemsToCSV(rows) {
-	let csvContent = "data:text/csv;charset=utf-8," 
-    + rows.map(e => Object.values(e).join(";")).join("\n");
+	let csvContent = "data:text/csv;charset=utf-8,"
+		+ rows.map(e => Object.values(e).join(";")).join("\n");
 
 	var encodedUri = encodeURI(csvContent);
 	var link = document.createElement("a");
@@ -95,7 +96,6 @@ function cartItemsToCSV(rows) {
 	container.appendChild(link);
 
 	// link.click(); // This will download the data file named "trollAndToad.csv".
-
 	var cartFooter = document.querySelector('.cart-footer');
 	cartFooter.appendChild(container);
 }
@@ -107,30 +107,32 @@ function cartItemsToCSV(rows) {
  * @return Arrat      Formatted array of items
  */
 function omegaFilter(rows) {
-	var rows = rows.map(function(row, index) {
+	var rows = rows.map(function (row, index) {
 		return {
 			'Cantidad': row.quantity,
 			'Nombre de Carta': row.name,
-			'Codigo': row.code,
-			'Precio Uni.': '$' + row.price,
-			'Total': '$' + row.subTotal,
+			'Código': row.code,
+			'Precio Original': row.originalPrice,
+			'Precio Uni.': row.price,
+			'Total': row.subTotal,
 			'Juego': row.game,
 			'Expansion': row.box,
 			'Foil': row.rarity,
 			'Detalles': null
 		}
 	});
-	var headers = ['Cantidad', 'Nombre de Carta', 'Código', 'Precio Uni.', 'Total', 'Juego', 'Expansion', 'Foil', 'Detalles'];
+	var headers = ['Cantidad', 'Nombre de Carta', 'Código', 'Precio Original', 'Precio Uni.', 'Total', 'Juego', 'Expansion', 'Foil', 'Detalles'];
 	rows.unshift(headers);
 	return rows;
 }
 // =============================================================================================
 
-var cartItems = document.querySelectorAll(".cart-body .cart-item");
 
+console.log("Starting the plugin");
+var cartItems = document.querySelectorAll(".cart-body .cart-item");
 var data = [];
-// ci: CartItem
-cartItems.forEach(function(ci, index) {
+// ci stands for: CartItem
+cartItems.forEach(function (ci, index) {
 	try {
 		var rawName = ci.querySelector('.item-name').innerText;
 		var price = parseFloat(ci.querySelector('.d-flex.align-items-center.w-100 .font-smaller:nth-child(4)').innerText.replace('$', ''));
@@ -145,17 +147,22 @@ cartItems.forEach(function(ci, index) {
 			game: getDataFromBox(box, 'game'),
 
 			quantity: quantity,
-			originalPrice: price,			
+			originalPrice: price,
 			price: roundHalf(price),
 			subTotal: roundHalf(price) * quantity
 		};
 		data.push(card);
-	} catch(e) {
+	} catch (e) {
 		console.log('Plugin error with item', index, ci);
 	}
 });
-
+console.log("cartItems", data);
 cartItemsToCSV(omegaFilter(data));
+
+var total = data.map(item => item.subTotal).reduce((a, b) => a + b, 0);
+
+console.log(`Plugin finished, you going to pay arround: ${total}`);
+
 
 /**
  * TODO:

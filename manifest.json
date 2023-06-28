@@ -2,12 +2,13 @@
   "manifest_version": 3,
   "name": "Troll & Toad cart to CSV",
   "description": "Add everthing that you want to your cart, we going to prepare your CSV to order",
-  "version": "1.0",
+  "version": "1.2",
   "content_scripts": [
     {
       "js": ["scripts/content.js"],
       "matches": [
-        "https://www.trollandtoad.com/cart"
+        "https://www.trollandtoad.com/cart",
+        "https://www.trollandtoad.com/cart.php"        
       ]
     }
   ]
